@@ -15,9 +15,9 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     const user = await this.userService.findByEmail(email);
     if (user && await bcrypt.compare(password, user.password)) {
-      return user; // Valid credentials
+      return user; 
     }
-    return null; // Invalid credentials
+    return null; 
   }
 
   // Generate JWT Token after validation
