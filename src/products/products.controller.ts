@@ -1,10 +1,26 @@
 import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { Product } from '@prisma/client';
+import { Category, Product } from '@prisma/client';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(private readonly productsService: ProductsService) { }
+
+  @Get("category")
+  async getAllCategory(): Promise<Category[]> {
+    return this.productsService.getAllCategory();
+  }
+
+  @Get("featured")
+  async getFeaturedProducts(): Promise<Product[]> {
+    return this.productsService.getFeaturedProducts();
+  }
+
+
+  @Post('category')
+  async createCategory(@Body() data: any): Promise<Category> {
+    return this.productsService.createCategory(data);
+  }
 
   @Get()
   async getAllProducts(): Promise<Product[]> {
@@ -20,6 +36,7 @@ export class ProductsController {
   async createProduct(@Body() data: any): Promise<Product> {
     return this.productsService.createProduct(data);
   }
+
 
   @Put(':id')
   async updateProduct(@Param('id') id: number, @Body() data: any): Promise<Product> {

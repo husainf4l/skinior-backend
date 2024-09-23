@@ -6,7 +6,7 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   // User Registration
   async create(createUserDto: CreateUserDto) {
@@ -45,6 +45,11 @@ export class UserService {
   async delete(id: string) {
     return this.prisma.user.delete({
       where: { id },
+    });
+  }
+
+  async findAllUsers() {
+    return this.prisma.user.findMany({
     });
   }
 }
