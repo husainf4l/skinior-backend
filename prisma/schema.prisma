@@ -64,7 +64,7 @@ model Category {
 model Product {
   id              Int         @id @default(autoincrement())
   name            String
-  description     String?
+  description     String?     @db.Text
   price           Decimal     @default(0.00) @db.Decimal(10, 2)
   barcode         String?     @unique
   brand           String?
