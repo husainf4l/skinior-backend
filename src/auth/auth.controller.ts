@@ -9,11 +9,16 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
+    console.log('Login request received:', loginDto);
+
     const user = await this.authService.validateUser(loginDto.email, loginDto.password);
     
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
+
+    console.log(user);
+
 
     return this.authService.login(user); // Moved JWT logic to the AuthService
   }

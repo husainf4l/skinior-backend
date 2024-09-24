@@ -6,7 +6,7 @@ import { Category, Product } from '@prisma/client';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) { }
 
-  @Get("category")
+  @Get("categories")
   async getAllCategory(): Promise<Category[]> {
     return this.productsService.getAllCategory();
   }
@@ -17,7 +17,7 @@ export class ProductsController {
   }
 
 
-  @Post('category')
+  @Post('categories')
   async createCategory(@Body() data: any): Promise<Category> {
     return this.productsService.createCategory(data);
   }
@@ -32,8 +32,10 @@ export class ProductsController {
     return this.productsService.getProductById(+id);
   }
 
-  @Post()
+  @Post('create')
   async createProduct(@Body() data: any): Promise<Product> {
+    console.log('Request Data:', data);
+
     return this.productsService.createProduct(data);
   }
 
