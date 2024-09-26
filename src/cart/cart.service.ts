@@ -1,93 +1,50 @@
 // src/cart/cart.service.ts
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { Cart, Prisma } from '@prisma/client';
 
 @Injectable()
 export class CartService {
-  constructor(private readonly prisma: PrismaService) {}
+  private cartStorage = new Map<string, any[]>(); // Temporary storage for guest carts
 
   // Add item to cart
-  async addToCart(
-    userId: string | null,
-    productId: number,
-    quantity: number,
-    variantId?: number
-  ) {
-    if (userId) {
-      // Handle logged-in user
-      return this.prisma.cartItem.create({
-        data: {
-          quantity,
-          product: {
-            connect: { id: productId }, // Connect to an existing product
-          },
-          variant: variantId
-            ? {
-                connect: { id: variantId }, // Connect to an existing variant if provided
-              }
-            : undefined,
-          cart: {
-            connectOrCreate: {
-              where: { userId }, // Connect to the user's cart if exists
-              create: { userId }, // Create a new cart for the user if not exists
-            },
-          },
-        },
-      });
-    } else {
-      // Handle guest user (alternative approach)
-      return this.handleGuestCart(productId, quantity, variantId);
+  async addToCart(userId: string | null, productId: number, quantity: number, variantId?: number) {
+    const cartKey = userId || 'guest'; // Use 'guest' as the key if no userId
+
+    if (!this.cartStorage.has(cartKey)) {
+      this.cartStorage.set(cartKey, []);
     }
-  }
-  
-  // Alternative method for handling guest cart (session-based or any other strategy)
-  private async handleGuestCart(productId: number, quantity: number, variantId?: number) {
-    return this.prisma.cartItem.create({
-      data: {
-        quantity,
-        product: {
-          connect: { id: productId }, // Connect to an existing product
-        },
-        variant: variantId
-          ? {
-              connect: { id: variantId }, // Connect to an existing variant if provided
-            }
-          : undefined,
-        cart: {
-          create: {}, // Create a cart for guest users without userId
-        },
-      },
-    });
-  }
-  
 
-  // Get cart by userId
-  async getCart(userId: string | null): Promise<Cart | null> {
-    return this.prisma.cart.findUnique({
-      where: { userId },
-      include: {
-        items: {
-          include: { product: true, variant: true },
-        },
-      },
-    });
+    const cart = this.cartStorage.get(cartKey);
+    const existingItemIndex = cart.findIndex(item => item.productId === productId && item.variantId === variantId);
+
+    if (existingItemIndex >= 0) {
+      cart[existingItemIndex].quantity += quantity;
+    } else {
+      cart.push({ productId, quantity, variantId });
+    }
+
+    return { message: 'Item added to cart', cart };
   }
 
-  // Remove item from cart
-  async removeFromCart(cartItemId: number): Promise<void> {
-    await this.prisma.cartItem.delete({
-      where: { id: cartItemId },
-    });
+  // Get cart details by userId or sessionId
+  async getCart(userId: string | null, sessionId: string | null) {
+    const cartKey = userId || sessionId || 'guest'; // Use sessionId or 'guest' if no userId
+    return this.cartStorage.get(cartKey) || [];
   }
 
-  // Clear cart by userId
-  async clearCart(userId: string | null): Promise<Cart | null> {
-    return this.prisma.cart.update({
-      where: { userId },
-      data: {
-        items: { deleteMany: {} },
-      },
-    });
+  // Remove item from cart by cartItemId
+  async removeFromCart(cartItemId: number, userId: string | null, sessionId: string | null) {
+    const cartKey = userId || sessionId || 'guest';
+    const cart = this.cartStorage.get(cartKey) || [];
+
+    const updatedCart = cart.filter(item => item.cartItemId !== cartItemId);
+    this.cartStorage.set(cartKey, updatedCart);
+    return { message: 'Item removed from cart', cart: updatedCart };
+  }
+
+  // Clear cart for a specific user or session
+  async clearCart(userId: string | null, sessionId: string | null) {
+    const cartKey = userId || sessionId || 'guest';
+    this.cartStorage.set(cartKey, []); // Clear cart by key
+    return { message: 'Cart cleared' };
   }
 }
