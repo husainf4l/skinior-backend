@@ -1,28 +1,68 @@
 // src/order/order.controller.ts
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Param,
+  Body,
+  Req,
+  UseGuards,
+  Query,
+  ParseUUIDPipe,
+  ParseEnumPipe,
+  NotFoundException,
+} from '@nestjs/common';
 import { OrderService } from './order.service';
-import { Order } from '@prisma/client';
-import { Prisma } from '@prisma/client';
+import { Request } from 'express';
+import { Role, OrderStatus } from '@prisma/client';
 
 @Controller('orders')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+  constructor(private readonly orderService: OrderService) { }
 
-  // Place order
   @Post()
-  async placeOrder(@Body() orderData: Prisma.OrderCreateInput): Promise<Order> {
-    return this.orderService.placeOrder(orderData);
+  async createOrder(@Body() orderData: any) {
+    return this.orderService.createOrder(orderData);
   }
 
-  // Get order by ID
-  @Get(':id')
-  async getOrderById(@Param('id') id: string): Promise<Order | null> {
-    return this.orderService.getOrderById(id);
+
+  // Get Orders for Authenticated User
+  @Get()
+  async getUserOrders(@Req() req: Request) {
+    const userId = req.user['id'];
+    return await this.orderService.getOrdersByUserId(userId);
   }
 
-  // Get orders by User ID
-  @Get('user/:userId')
-  async getOrdersByUserId(@Param('userId') userId: string): Promise<Order[]> {
-    return this.orderService.getOrdersByUserId(userId);
+  // Get Order by ID (For guests to check their order status)
+  @Get(':orderId')
+  async getOrderById(
+    @Param('orderId', ParseUUIDPipe) orderId: string,
+    @Query('customerEmail') customerEmail: string,
+    @Req() req: Request,
+  ) {
+    if (req.user) {
+      // Authenticated user
+      const userId = req.user['id'];
+      const order = await this.orderService.getOrdersByUserId(userId);
+      const foundOrder = order.find((o) => o.id === orderId);
+      if (!foundOrder) {
+        throw new NotFoundException('Order not found');
+      }
+      return foundOrder;
+    } else {
+      // Guest user, verify email
+      return await this.orderService.getOrderById(orderId, customerEmail);
+    }
+  }
+
+  // Update Order Status (Admin functionality)
+  @Put(':orderId/status')
+  async updateOrderStatus(
+    @Param('orderId', ParseUUIDPipe) orderId: string,
+    @Body('status', new ParseEnumPipe(OrderStatus)) status: OrderStatus,
+  ) {
+    return await this.orderService.updateOrderStatus(orderId, status);
   }
 }
