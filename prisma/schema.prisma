@@ -58,6 +58,7 @@ model Category {
   name        String    @unique
   description String?
   products    Product[]
+  images      String[]
 }
 
 // PRODUCT MANAGEMENT
