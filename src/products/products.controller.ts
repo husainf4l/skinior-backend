@@ -3,6 +3,7 @@
 import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { Category, Product } from '@prisma/client';
+import { ProductList } from '../module/interfaces.model';
 
 @Controller('products')
 export class ProductsController {
@@ -29,7 +30,7 @@ export class ProductsController {
   }
 
   @Get()
-  async getAllProducts(): Promise<Product[]> {
+  async getAllProducts(): Promise<ProductList[]> {
     return this.productsService.getAllProducts();
   }
 

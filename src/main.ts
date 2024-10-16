@@ -12,8 +12,14 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
     prefix: '/uploads/',
   });
+
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/api/uploads/',
+  });
+
+  app.setGlobalPrefix('api');
   app.enableCors();
 
-  await app.listen(3000);
+  await app.listen(3001, '0.0.0.0');
 }
 bootstrap();

@@ -3,16 +3,22 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Category, Product } from '@prisma/client';
+import { ProductList } from '../module/interfaces.model';
 
 @Injectable()
 export class ProductsService {
   constructor(private prisma: PrismaService) { }
 
   // Get all products
-  async getAllProducts(): Promise<Product[]> {
+  async getAllProducts(): Promise<ProductList[]> {
     return this.prisma.product.findMany({
-      include: {
-        images: true, // Include related images
+      select: {
+        barcode: true,
+        id: true,
+        name: true,
+        price: true,
+        categoryId: true,
+        isFeatured: true
       },
     });
   }
@@ -24,7 +30,7 @@ export class ProductsService {
         categoryId,
       },
       include: {
-        images: true, // Include related images
+        images: true,
       },
     });
   }
@@ -65,13 +71,33 @@ export class ProductsService {
     });
   }
 
-  // Update product
   async updateProduct(id: number, data: any): Promise<Product> {
     return this.prisma.product.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        images: {
+          deleteMany: {}, // Optionally delete old images
+          create: data.images.map((image) => ({
+            url: image.url,
+            altText: image.altText,
+          })),
+        },
+        reviews: {
+          upsert: data.reviews.map((review) => ({
+            where: { id: review.id },
+            update: { ...review },
+            create: { ...review },
+          })),
+        },
+        variants: {
+          // Example: Handle variants similarly to reviews
+        },
+      },
     });
   }
+
+
 
   // Delete product
   async deleteProduct(id: number): Promise<Product> {

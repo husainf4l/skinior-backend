@@ -41,15 +41,12 @@ export class OrderService {
     }
 
     // Calculate total amount
-    const totalAmount = cart.items.reduce((total: Prisma.Decimal, item) => {
-      const price: Prisma.Decimal = item.variant
-        ? item.variant.price
-        : item.product.price;
-      const quantity = new Prisma.Decimal(item.quantity);
-      const itemTotal = price.mul(quantity);
-      return total.add(itemTotal);
-    }, new Prisma.Decimal(0));
-
+    const totalAmount = cart.items.reduce((total: number, item) => {
+      const price: number = item.variant ? item.variant.price : item.product.price;
+      const quantity = item.quantity; // No need for Decimal conversion, quantity is a number now
+      const itemTotal = price * quantity; // Simply multiply numbers
+      return total + itemTotal; // Add to total
+    }, 0);
     // Build the data object
     const orderDataInput: Prisma.OrderCreateInput = {
       totalAmount,
