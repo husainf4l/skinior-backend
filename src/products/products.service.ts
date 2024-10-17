@@ -18,7 +18,8 @@ export class ProductsService {
         name: true,
         price: true,
         categoryId: true,
-        isFeatured: true
+        isFeatured: true,
+        images: true
       },
     });
   }
@@ -31,6 +32,7 @@ export class ProductsService {
       },
       include: {
         images: true,
+        category: true,
       },
     });
   }
@@ -51,6 +53,25 @@ export class ProductsService {
       },
     });
   }
+  async getFeaturedProductsByCategory(categoryId: number): Promise<ProductList[]> {
+    return this.prisma.product.findMany({
+      select: {
+        barcode: true,
+        id: true,
+        name: true,
+        price: true,
+        categoryId: true,
+        isFeatured: true,
+        images: true,
+      },
+      where: {
+        isFeatured: true,
+        categoryId: categoryId,
+      },
+    });
+  }
+
+
 
   // Get product by ID
   async getProductById(id: number): Promise<Product> {

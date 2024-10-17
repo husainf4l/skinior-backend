@@ -4,10 +4,11 @@ export interface ProductList {
     id: number;
     name: string;
     price: number;
-    barcode?: string;        // Make optional
-    brand?: string;          // Make optional
+    barcode?: string;
+    brand?: string;
     isFeatured?: boolean;
-    categoryId?: number;     // Make optional
+    categoryId?: number;
+    images: Image[];
 }
 
 export interface Product {

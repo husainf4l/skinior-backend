@@ -19,9 +19,10 @@ export class ProductsController {
     return this.productsService.getProductsByCategoryId(+categoryId);
   }
 
-  @Get('featured')
-  async getFeaturedProducts(): Promise<Product[]> {
-    return this.productsService.getFeaturedProducts();
+
+  @Get('featured/:categoryId')
+  async getFeaturedProductsByCategory(@Param(`categoryId`) categoryId: number): Promise<ProductList[]> {
+    return this.productsService.getFeaturedProductsByCategory(+categoryId);
   }
 
   @Get(':id')
