@@ -27,9 +27,12 @@ export class OrderController {
     return this.orderService.createOrder(orderData);
   }
 
-
-  // Get Orders for Authenticated User
   @Get()
+  async getOrders() {
+    return await this.orderService.getOrders();
+  }
+
+  @Get(`userId`)
   async getUserOrders(@Req() req: Request) {
     const userId = req.user['id'];
     return await this.orderService.getOrdersByUserId(userId);
@@ -57,12 +60,5 @@ export class OrderController {
     }
   }
 
-  // Update Order Status (Admin functionality)
-  @Put(':orderId/status')
-  async updateOrderStatus(
-    @Param('orderId', ParseUUIDPipe) orderId: string,
-    @Body('status', new ParseEnumPipe(OrderStatus)) status: OrderStatus,
-  ) {
-    return await this.orderService.updateOrderStatus(orderId, status);
-  }
+
 }

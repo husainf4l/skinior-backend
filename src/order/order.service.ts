@@ -2,7 +2,7 @@
 
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma, OrderStatus } from '@prisma/client';
+import { Prisma, OrderStatus, Order } from '@prisma/client';
 
 @Injectable()
 export class OrderService {
@@ -89,6 +89,13 @@ export class OrderService {
   }
 
 
+  async getOrders() {
+    return await this.prisma.order.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+  }
 
   // Get Orders by User ID (Authenticated users)
   async getOrdersByUserId(userId: string) {
@@ -125,18 +132,24 @@ export class OrderService {
     if (!order) {
       throw new NotFoundException('Order not found');
     }
-
-
-
     return order;
   }
 
-  // Update Order Status (Admin functionality)
-  async updateOrderStatus(orderId: string, status: OrderStatus) {
-    const order = await this.prisma.order.update({
-      where: { id: orderId },
-      data: { status },
+
+  async updateOrder(id: string, data: Partial<Order>): Promise<Order> {
+    const existingOrder = await this.prisma.order.findUnique({ where: { id } });
+
+    if (!existingOrder) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+
+    return this.prisma.order.update({
+      where: { id },
+      data: {
+        ...data,
+        updatedAt: new Date(),
+      },
     });
-    return order;
   }
+
 }
