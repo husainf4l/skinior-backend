@@ -42,7 +42,7 @@ export class OrderService {
 
     // Calculate total amount
     const totalAmount = cart.items.reduce((total: number, item) => {
-      const price: number = item.variant ? item.variant.price : item.product.price;
+      const price: number = item.product.price;
       const quantity = item.quantity; // No need for Decimal conversion, quantity is a number now
       const itemTotal = price * quantity; // Simply multiply numbers
       return total + itemTotal; // Add to total
@@ -59,7 +59,6 @@ export class OrderService {
           product: { connect: { id: item.productId } },
           variant: item.variantId ? { connect: { id: item.variantId } } : undefined,
           quantity: item.quantity,
-          price: item.variant ? item.variant.price : item.product.price,
         })),
       },
     };
