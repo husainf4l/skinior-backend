@@ -75,7 +75,7 @@ model Product {
   orderItems      OrderItem[]
   cartItems       CartItem[]
   wishlistItems   Wishlist[]  @relation("WishlistProducts")
-  variants        Variant[]
+  variants        Variant[]   @relation("ProductVariant")
   relatedProducts Product[]   @relation("RelatedProducts")
   relatedBy       Product[]   @relation("RelatedProducts")
   createdAt       DateTime    @default(now())
@@ -83,17 +83,12 @@ model Product {
 }
 
 model Variant {
-  id             Int         @id @default(autoincrement())
-  productId      Int
-  name           String
-  price          Float       @default(0.00)
-  compareAtPrice Float       @default(0.00) // Add compare at price for discounts
-  stock          Int         @default(0)
-  sku            String?     @unique
-  product        Product     @relation(fields: [productId], references: [id])
-  images         Image[]     @relation("VariantImages")
-  orderItems     OrderItem[] // Added opposite relation
-  cartItems      CartItem[] // Added opposite relation
+  id         Int         @id @default(autoincrement())
+  name       String
+  image      String
+  products   Product[]   @relation("ProductVariant")
+  orderItems OrderItem[]
+  cartItems  CartItem[]
 }
 
 model Image {
@@ -102,8 +97,6 @@ model Image {
   altText   String?
   productId Int?
   product   Product? @relation("ProductImages", fields: [productId], references: [id])
-  variantId Int?
-  variant   Variant? @relation("VariantImages", fields: [variantId], references: [id])
 }
 
 model Tag {

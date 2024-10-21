@@ -34,6 +34,7 @@ export class ProductsService {
         images: true,
         category: true,
       },
+
     });
   }
 
@@ -78,9 +79,10 @@ export class ProductsService {
     return this.prisma.product.findUnique({
       where: { id },
       include: {
-        images: true, // Include related images
-        reviews: true, // Include related reviews
-        variants: true, // Include variants
+        images: true,
+        reviews: true,
+        variants: true
+
       },
     });
   }
