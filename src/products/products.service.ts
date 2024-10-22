@@ -3,29 +3,37 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAll() {
     return this.prisma.product.findMany();
   }
-  async featuredCategory(categoryId:number){
+  async featuredCategory(categoryId: number) {
     return this.prisma.product.findMany({
-      where:{
+      where: {
         categoryId,
-        isFeatured:true
+        isFeatured: true
       }
     })
   }
 
-  async categoryProducts(categoryId:number){
+  async categoryProducts(categoryId: number) {
     return this.prisma.product.findMany({
-      where:{categoryId}
+      where: { categoryId },
+      select: {
+        id: true,
+        name: true,
+        image: true,
+        price: true,
+        discountedPrice: true
+      }
+
     })
   }
 
 
   async findOne(id: number) {
-    return this.prisma.product.findUnique({ where: { id }, include:{items:true}});
+    return this.prisma.product.findUnique({ where: { id }, include: { items: true } });
   }
 
   async create(data: any) {
