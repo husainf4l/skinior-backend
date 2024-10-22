@@ -1,52 +1,32 @@
-// src/products/products.controller.ts
-
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { Category, Product } from '@prisma/client';
-import { ProductList } from '../module/interfaces.model';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) { }
+  constructor(private readonly productsService: ProductsService) {}
 
-  @Get('categories')
-  async getAllCategory(): Promise<Category[]> {
-    return this.productsService.getAllCategory();
-  }
-
-  @Get('category/:categoryId')
-  async getProductsByCategoryId(@Param('categoryId') categoryId: number): Promise<Product[]> {
-    return this.productsService.getProductsByCategoryId(+categoryId);
-  }
-
-
-  @Get('featured/:categoryId')
-  async getFeaturedProductsByCategory(@Param(`categoryId`) categoryId: number): Promise<ProductList[]> {
-    return this.productsService.getFeaturedProductsByCategory(+categoryId);
+  @Get()
+  async findAll() {
+    return this.productsService.findAll();
   }
 
   @Get(':id')
-  async getProductById(@Param('id') id: number): Promise<Product> {
-    return this.productsService.getProductById(+id);
+  async findOne(@Param('id') id: number) {
+    return this.productsService.findOne(+id);
   }
 
-  @Get()
-  async getAllProducts(): Promise<ProductList[]> {
-    return this.productsService.getAllProducts();
+  @Post()
+  async create(@Body() data: any) {
+    return this.productsService.create(data);
   }
 
-  @Post('create')
-  async createProduct(@Body() data: any): Promise<Product> {
-    return this.productsService.createProduct(data);
-  }
-
-  @Put(':id')
-  async updateProduct(@Param('id') id: number, @Body() data: any): Promise<Product> {
-    return this.productsService.updateProduct(+id, data);
+  @Patch(':id')
+  async update(@Param('id') id: number, @Body() data: any) {
+    return this.productsService.update(+id, data);
   }
 
   @Delete(':id')
-  async deleteProduct(@Param('id') id: number): Promise<Product> {
-    return this.productsService.deleteProduct(+id);
+  async delete(@Param('id') id: number) {
+    return this.productsService.delete(+id);
   }
 }

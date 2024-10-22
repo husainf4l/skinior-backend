@@ -1,44 +1,32 @@
-// src/users/user.controller.ts
-import { Controller, Post, Body, Param, Get, Put, Delete, UseGuards } from '@nestjs/common';
-import { UserService } from './users.service';
-import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
+import { UsersService } from './users.service';
 
 @Controller('users')
-export class UserController {
-  constructor(private readonly userService: UserService) { }
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
 
-  @Post('register')
-  async create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  @Get()
+  async findAll() {
+    return this.usersService.findAll();
   }
 
-  @Get('all')
-  async findAllUsers() {
-    return this.userService.findAllUsers()
-  }
-
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  async findById(@Param('id') id: string) {
-    return this.userService.findById(id);
+  async findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  @Post()
+  async create(@Body() data: any) {
+    return this.usersService.create(data);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() data: any) {
+    return this.usersService.update(id, data);
+  }
+
   @Delete(':id')
   async delete(@Param('id') id: string) {
-    return this.userService.delete(id);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile() {
-    return { message: 'This is a protected route!' };
+    return this.usersService.delete(id);
   }
 }
