@@ -8,6 +8,21 @@ export class ProductsService {
   async findAll() {
     return this.prisma.product.findMany();
   }
+  async featuredCategory(categoryId:number){
+    return this.prisma.product.findMany({
+      where:{
+        categoryId,
+        isFeatured:true
+      }
+    })
+  }
+
+  async categoryProducts(categoryId:number){
+    return this.prisma.product.findMany({
+      where:{categoryId}
+    })
+  }
+
 
   async findOne(id: number) {
     return this.prisma.product.findUnique({ where: { id }, include:{items:true}});

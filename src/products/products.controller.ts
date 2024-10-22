@@ -10,10 +10,21 @@ export class ProductsController {
     return this.productsService.findAll();
   }
 
+  @Get('featured/:categoryId')
+  async featuredCategory(@Param('categoryId') categoryId:number){
+    return this.productsService.featuredCategory(+categoryId);
+  }
+
+  @Get('category/:categoryId')
+  async categoriesProducts(@Param('categoryId') categoryId:number){
+    return this.productsService.categoryProducts(+categoryId)
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: number) {
     return this.productsService.findOne(+id);
   }
+
 
   @Post()
   async create(@Body() data: any) {
