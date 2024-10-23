@@ -15,11 +15,8 @@ enum Role {
 }
 
 enum OrderStatusenm {
-  SEEN
   PENDING
-  PROCESSING
-  SHIPPED
-  DELIVERED
+  COMPLETED
   CANCELLED
 }
 
@@ -160,6 +157,8 @@ model Address {
   userAddresses UserAddress[]
 
   ShoppingCart ShoppingCart[]
+
+  Order Order[]
 }
 
 model Country {
@@ -199,41 +198,44 @@ model UserReview {
 }
 
 model ShoppingCart {
-  id         Int        @id @default(autoincrement())
-  userId     String?
-  sessionsId String?
-  items      CartItem[]
-  addressId  Int?
-  address    Address?   @relation(fields: [addressId], references: [id])
-  total      Float      @default(0.0)
+  id            Int        @id @default(autoincrement())
+  userId        String?
+  sessionsId    String     @unique
+  items         CartItem[]
+  addressId     Int?
+  address       Address?   @relation(fields: [addressId], references: [id])
+  total         Float      @default(0.0)
+  totalQuantity Int        @default(0)
 }
 
 model Order {
   id               Int            @id @default(autoincrement())
   userId           String?
   guestInfoId      Int?
-  date             DateTime
+  addressId        Int?
   paymentMethodId  Int?
   shippingMethodId Int
   status           OrderStatusenm
   total            Float
+  date             DateTime       @default(now())
   user             User?          @relation(fields: [userId], references: [id])
   guestInfo        GuestInfo?     @relation(fields: [guestInfoId], references: [id])
+  address          Address?       @relation(fields: [addressId], references: [id])
   shippingMethod   ShippingMethod @relation(fields: [shippingMethodId], references: [id])
-
+  cartItems        CartItem[]
 }
 
 model CartItem {
-  id             Int    @id @default(autoincrement())
+  id             Int           @id @default(autoincrement())
   shoppingCartId Int?
   productId      Int
   variantId      Int?
   quantity       Int
-  price          Float
-  total          Float  @default(0.0)
-
-  // Relations
+  price          Float         @default(0.0)
+  total          Float         @default(0.0)
   shoppingCart   ShoppingCart? @relation(fields: [shoppingCartId], references: [id])
-  product        Product @relation(fields: [productId], references: [id])
-  variant        Variant? @relation(fields: [variantId], references: [id])
+  product        Product       @relation(fields: [productId], references: [id])
+  variant        Variant?      @relation(fields: [variantId], references: [id])
+  orderId        Int?
+  Order          Order[]
 }

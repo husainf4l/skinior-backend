@@ -1,0 +1,30 @@
+POST /cart/item
+
+{
+  "sessionsId": "abc123",
+  "productId": 1,
+  "variantId": 2,
+  "quantity": 3,
+  "isAdd": true
+}
+
+
+GET /cart/:sessionsId
+
+PUT /cart/item/:itemId
+
+{
+  "quantity": 5
+}
+
+{
+  "message": "Cart item with ID 10 removed."
+}
+
+
+PUT /cart/item/10
+{
+  "quantity": 5
+}
+
+
