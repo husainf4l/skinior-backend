@@ -40,13 +40,11 @@ export class CsvUploadService {
                 const productItems = JSON.parse(items); // Expecting `items` to be JSON formatted in CSV
 
                 for (const item of productItems) {
-                  await this.prisma.productItem.create({
+                  await this.prisma.variant.create({
                     data: {
+                      name:createdProduct.name,
                       productId: createdProduct.id,
                       sku: item.sku,
-                      stock: Number(item.stock),
-                      price: parseFloat(item.price),
-                      discountedPrice: item.discountedPrice ? parseFloat(item.discountedPrice) : null,
                     },
                   });
                 }

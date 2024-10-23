@@ -6,11 +6,11 @@ export class OrdersService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.order.findMany({ include: { lines: true } });
+    return this.prisma.order.findMany({  });
   }
 
   async findOne(id: number) {
-    return this.prisma.order.findUnique({ where: { id }, include: { lines: true } });
+    return this.prisma.order.findUnique({ where: { id },  });
   }
 
   async create(data: any) {

@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
 import { ProductsService } from './products.service';
+import { Prisma } from '@prisma/client';
 
 @Controller('products')
 export class ProductsController {
@@ -27,12 +28,12 @@ export class ProductsController {
 
 
   @Post()
-  async create(@Body() data: any) {
+  async create(@Body() data: Prisma.ProductCreateInput) {
     return this.productsService.create(data);
   }
 
   @Patch(':id')
-  async update(@Param('id') id: number, @Body() data: any) {
+  async update(@Param('id') id: number, @Body() data: Prisma.ProductUpdateInput) {
     return this.productsService.update(+id, data);
   }
 

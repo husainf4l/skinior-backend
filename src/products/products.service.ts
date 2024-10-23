@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+
 
 @Injectable()
 export class ProductsService {
@@ -33,14 +35,14 @@ export class ProductsService {
 
 
   async findOne(id: number) {
-    return this.prisma.product.findUnique({ where: { id }, include: { items: true } });
+    return this.prisma.product.findUnique({ where: { id }, include: { variants: true } });
   }
 
-  async create(data: any) {
+  async create(data: Prisma.ProductCreateInput) {
     return this.prisma.product.create({ data });
   }
 
-  async update(id: number, data: any) {
+  async update(id: number, data: Prisma.ProductUpdateInput) {
     return this.prisma.product.update({ where: { id }, data });
   }
 

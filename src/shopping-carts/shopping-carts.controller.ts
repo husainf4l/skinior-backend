@@ -12,7 +12,7 @@ export class ShoppingCartsController {
 
   @Get(':id')
   async findOne(@Param('id') id: number) {
-    return this.shoppingCartsService.findOne(id);
+    return this.shoppingCartsService.findOne(+id);
   }
 
   @Post()

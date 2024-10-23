@@ -6,7 +6,7 @@ export class UserReviewsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.userReview.findMany({ include: { user: true, item: true } });
+    return this.prisma.userReview.findMany({ include: { user: true, variant: true } });
   }
 
   async findOne(id: number) {

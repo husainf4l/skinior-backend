@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Param, Body, Patch, Delete } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { CartItemsService } from './cart-items.service';
+import { Prisma } from '@prisma/client';
 
 @Controller('cart-items')
 export class CartItemsController {
-  constructor(private readonly cartItemsService: CartItemsService) {}
+    constructor(private readonly cartItemsService: CartItemsService) {}
 
   @Get()
   async findAll() {
@@ -12,11 +13,11 @@ export class CartItemsController {
 
   @Get(':id')
   async findOne(@Param('id') id: number) {
-    return this.cartItemsService.findOne(id);
+    return this.cartItemsService.findOne(+id);
   }
 
   @Post()
-  async create(@Body() data: any) {
+  async create(@Body() data: Prisma.CartItemUncheckedCreateInput) {
     return this.cartItemsService.create(data);
   }
 

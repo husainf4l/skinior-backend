@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ShoppingCartsService {
@@ -13,11 +14,12 @@ export class ShoppingCartsService {
     return this.prisma.shoppingCart.findUnique({ where: { id }, include: { items: true } });
   }
 
-  async create(data: any) {
+  async create(data: Prisma.ShoppingCartCreateInput) {
     return this.prisma.shoppingCart.create({ data });
   }
 
-  async update(id: number, data: any) {
+
+  async update(id: number, data: Prisma.ShoppingCartUpdateInput) {
     return this.prisma.shoppingCart.update({ where: { id }, data });
   }
 
