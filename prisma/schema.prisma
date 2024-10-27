@@ -51,32 +51,34 @@ model Profile {
 
 // Product Models
 model Product {
-  id              Int       @id @default(autoincrement())
+  id              Int         @id @default(autoincrement())
   name            String
   descriptionAr   String?
   descriptionEn   String?
   image           String?
-  handle          String?   @unique @default(uuid())
-  isFeatured      Boolean   @default(false)
-  categoryHandle      String @default("hair-care")
-  price           Float     @default(0)
+  handle          String?     @unique @default(uuid())
+  isFeatured      Boolean     @default(false)
+  categoryHandle  String      @default("hair-care")
+  price           Float       @default(0)
   discountedPrice Float?
-  category        Category  @relation(fields: [categoryHandle], references: [handle])
+  category        Category    @relation(fields: [categoryHandle], references: [handle])
   variants        Variant[]
-
-  CartItem CartItem[]
-
-  OrderItem OrderItem[]
+  stock           Int         @default(10)
+  metaDescription String?
+  metaTitle       String?
+  metaKeywords    String?
+  CartItem        CartItem[]
+  OrderItem       OrderItem[]
 }
 
 model Variant {
-  id        Int     @id @default(autoincrement())
-  productId Int
-  name      String
-  sku       String
-  image     String?
-  product Product @relation(fields: [productId], references: [id])
-  CartItem CartItem[]
+  id         Int          @id @default(autoincrement())
+  productId  Int
+  name       String
+  sku        String
+  image      String?
+  product    Product      @relation(fields: [productId], references: [id])
+  CartItem   CartItem[]
   UserReview UserReview[]
 
   OrderItem OrderItem[]
@@ -92,7 +94,7 @@ model Category {
   subcategories Category[]          @relation("Parent")
   products      Product[]
   promotions    PromotionCategory[]
-  handle        String  @unique
+  handle        String              @unique
 }
 
 model Promotion {
@@ -107,8 +109,8 @@ model Promotion {
 }
 
 model PromotionCategory {
-  categoryHandle  String
-  promotionId Int
+  categoryHandle String
+  promotionId    Int
 
   category  Category  @relation(fields: [categoryHandle], references: [handle])
   promotion Promotion @relation(fields: [promotionId], references: [id])
@@ -146,17 +148,16 @@ model UserAddress {
 }
 
 model Address {
-  id         Int     @id @default(autoincrement())
-  line1      String
-  line2      String?
-  city       String
-  phoneNumber String
-  country       String      
+  id            Int            @id @default(autoincrement())
+  line1         String
+  line2         String?
+  city          String
+  phoneNumber   String
+  country       String
   userAddresses UserAddress[]
-  ShoppingCart ShoppingCart[]
-  Order Order[]
+  ShoppingCart  ShoppingCart[]
+  Order         Order[]
 }
-
 
 model UserPaymentMethod {
   id            Int      @id @default(autoincrement())
@@ -204,7 +205,7 @@ model Order {
   guestInfoId      Int?
   addressId        Int?
   paymentMethodId  Int?
-  shippingMethodId Int             // This field must be defined here
+  shippingMethodId Int // This field must be defined here
   status           OrderStatusenm
   total            Float
   date             DateTime       @default(now())
@@ -216,16 +217,16 @@ model Order {
 }
 
 model OrderItem {
-  id        Int    @id @default(autoincrement())
+  id        Int   @id @default(autoincrement())
   orderId   Int
   productId Int
   variantId Int?
   quantity  Int
-  price     Float  @default(0.0)
-  total     Float  @default(0.0)
+  price     Float @default(0.0)
+  total     Float @default(0.0)
 
-  order   Order   @relation(fields: [orderId], references: [id])
-  product Product @relation(fields: [productId], references: [id])
+  order   Order    @relation(fields: [orderId], references: [id])
+  product Product  @relation(fields: [productId], references: [id])
   variant Variant? @relation(fields: [variantId], references: [id])
 }
 
