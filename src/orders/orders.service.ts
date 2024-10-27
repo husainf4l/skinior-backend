@@ -34,7 +34,7 @@ export class OrderService {
         addressId: data.addressId,
         total,
         status: OrderStatusenm.PENDING,
-        cartItems: {
+        orderItems: {
           create: cart.items.map((item) => ({
             productId: item.productId,
             variantId: item.variantId,
@@ -44,7 +44,7 @@ export class OrderService {
           })),
         },
       },
-      include: { address: true, guestInfo: true, cartItems: true },
+      include: { address: true, guestInfo: true, orderItems: true },
     });
 
     await this.prisma.shoppingCart.delete({ where: { id: data.cartId } });
@@ -55,7 +55,7 @@ export class OrderService {
   async findAllOrders(userId: string) {
     const orders = await this.prisma.order.findMany({
       where: { userId },
-      include: { cartItems: true },
+      include: { orderItems: true },
     });
 
     if (!orders.length) {
@@ -69,7 +69,7 @@ export class OrderService {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: {
-        cartItems: true,
+        orderItems: true,
         address: true,
         guestInfo: true,
       },
@@ -97,4 +97,53 @@ export class OrderService {
     console.log(`Order ${orderId} status updated to ${status}`);
     return order;
   }
+
+
+  async createOrderFromSessionId(sessionId: string): Promise<any> {
+    // Step 1: Find the cart by session ID
+    const cart = await this.prisma.shoppingCart.findUnique({
+      where: { sessionsId: sessionId },
+      include: { items: true, address: true },
+    });
+
+    if (!cart) {
+      throw new NotFoundException('Cart not found');
+    }
+    // You need a valid shipping method ID for the order
+    const defaultShippingMethod = await this.prisma.shippingMethod.findFirst();
+    if (!defaultShippingMethod) {
+      throw new NotFoundException('No shipping method available');
+    }
+
+    const order = await this.prisma.order.create({
+      data: {
+        total: cart.total,
+        status: 'PENDING',
+        shippingMethod: { connect: { id: 1 } }, 
+        address: cart.address ? { connect: { id: cart.address.id } } : undefined,
+        orderItems: {
+          create: cart.items.map((item) => ({
+            productId: item.productId,
+            variantId: item.variantId,
+            quantity: item.quantity,
+            price: item.price,
+            total: item.total,
+          })),
+        },
+      },
+      include: { orderItems: true, address: true, shippingMethod: true },
+    });
+    
+
+    await this.prisma.cartItem.deleteMany({
+      where: { shoppingCartId: cart.id },
+    });
+
+    await this.prisma.shoppingCart.delete({
+      where: { id: cart.id },
+    });
+
+    return order;
+  }
+
 }

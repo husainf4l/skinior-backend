@@ -11,14 +11,19 @@ export class ProductsController {
     return this.productsService.findAll();
   }
 
-  @Get('featured/:categoryId')
-  async featuredCategory(@Param('categoryId') categoryId:number){
-    return this.productsService.featuredCategory(+categoryId);
+  @Get('featured/:categoryHandle')
+  async featuredCategory(@Param('categoryHandle') categoryHandle:string){
+    return this.productsService.featuredCategory(categoryHandle);
   }
 
-  @Get('category/:categoryId')
-  async categoriesProducts(@Param('categoryId') categoryId:number){
-    return this.productsService.categoryProducts(+categoryId)
+  @Get('category/:categoryHandle')
+  async categoriesProducts(@Param('categoryHandle') categoryHandle:string){
+    return this.productsService.categoryProducts(categoryHandle)
+  }
+
+  @Get('/handle/:handle')
+  async findOneHandel(@Param('handle') handle: string) {
+    return this.productsService.findOneHandle(handle);
   }
 
   @Get(':id')

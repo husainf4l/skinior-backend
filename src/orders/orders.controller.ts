@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Body, Patch, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Patch, NotFoundException, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { OrderService } from './orders.service';
 import { OrderStatusenm } from '@prisma/client';
 
@@ -20,6 +20,18 @@ export class OrderController {
     return order;
   }
 
+
+  @Post('session/:sessionId')
+  async createOrderSession(@Param('sessionId') sessionId: string) {
+    try {
+      const order = await this.orderService.createOrderFromSessionId(sessionId);
+      return { message: 'Order created successfully', order };
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+
   @Get('user/:userId')
   async getAllOrders(@Param('userId') userId: string) {
     const orders = await this.orderService.findAllOrders(userId);
@@ -29,7 +41,7 @@ export class OrderController {
 
   @Get('order/:id')
   async getOrderById(@Param('id') id: number) {
-    return this.orderService.getOrderById(id);
+    return this.orderService.getOrderById(+id);
   }
 
   @Patch(':id/status')

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Address, Prisma } from '@prisma/client';
 
 @Injectable()
 export class CartService {
@@ -177,4 +177,40 @@ export class CartService {
             include: { items: { include: { product: true } } },
         });
     }
+
+    async createOrUpdateAddress(
+        sessionId: string,
+        address:Prisma.AddressCreateInput
+      ) {
+        // Check if the shopping cart exists
+        const cart = await this.prisma.shoppingCart.findUnique({
+          where: { sessionsId: sessionId },
+        });
+    
+        if (!cart) {
+          throw new NotFoundException('Shopping cart not found');
+        }
+    
+        // Create a new address and associate it with the shopping cart
+        const newAddress = await this.prisma.address.create({
+          data: {
+            ...address,
+            ShoppingCart: {
+              connect: { id: cart.id },
+            },
+          },
+        });
+    
+        // Update the cart to reference the new address
+        await this.prisma.shoppingCart.update({
+          where: { id: cart.id },
+          data: { addressId: newAddress.id },
+        });
+    
+        console.log(`Address created and linked to cart with session ID: ${sessionId}`);
+        return { message: 'Address created successfully', address: newAddress };
+      }
+    
+    
+      
 }

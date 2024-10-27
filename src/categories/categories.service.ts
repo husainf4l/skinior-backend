@@ -9,19 +9,19 @@ export class CategoriesService {
     return this.prisma.category.findMany();
   }
 
-  async findOne(id: number) {
-    return this.prisma.category.findUnique({ where: { id } });
+  async findOne(handle: string) {
+    return this.prisma.category.findUnique({ where: { handle } });
   }
 
   async create(data: any) {
     return this.prisma.category.create({ data });
   }
 
-  async update(id: number, data: any) {
-    return this.prisma.category.update({ where: { id }, data });
+  async update(handle: string, data: any) {
+    return this.prisma.category.update({ where: { handle }, data });
   }
 
-  async delete(id: number) {
-    return this.prisma.category.delete({ where: { id } });
+  async delete(handle: string) {
+    return this.prisma.category.delete({ where: { handle } });
   }
 }

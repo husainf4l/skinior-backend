@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, HttpException, HttpStatus } from '@nestjs/common';
 import { CartService } from './cart.service';
+import { Prisma } from '@prisma/client';
 
 @Controller('cart')
 export class CartController {
@@ -25,14 +26,7 @@ export class CartController {
         }
     }
 
-    @Get(':sessionsId')
-    async getCart(@Param('sessionsId') sessionsId: string) {
-        try {
-            return await this.cartService.getOrCreateCart(sessionsId);
-        } catch (error) {
-            throw new HttpException('Cart not found', HttpStatus.NOT_FOUND);
-        }
-    }
+  
 
     @Put('item/:itemId')
     async updateItemQuantity(
@@ -59,6 +53,26 @@ export class CartController {
             };
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+        }
+    }
+    @Post('address/:sessionId')
+    async addAddress(
+      @Param('sessionId') sessionId: string,
+      @Body() address:Prisma.AddressCreateInput
+    ) {
+      try {
+        return await this.cartService.createOrUpdateAddress(sessionId, address);
+      } catch (error) {
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      }
+    }
+    
+    @Get(':sessionsId')
+    async getCart(@Param('sessionsId') sessionsId: string) {
+        try {
+            return await this.cartService.getOrCreateCart(sessionsId);
+        } catch (error) {
+            throw new HttpException('Cart not found', HttpStatus.NOT_FOUND);
         }
     }
 }

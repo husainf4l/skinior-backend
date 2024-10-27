@@ -18,7 +18,7 @@ export class CsvUploadService {
         .on('end', async () => {
           try {
             for (const product of products) {
-              const { name, descriptionAr, descriptionEn, image, categoryId, price, discountedPrice,handle, items } = product;
+              const { name, descriptionAr, descriptionEn, image, categoryHandle, price, discountedPrice,handle, items } = product;
 
               // Create the product
               const createdProduct = await this.prisma.product.create({
@@ -27,7 +27,7 @@ export class CsvUploadService {
                   descriptionAr,
                   descriptionEn,
                   image,
-                  categoryId: Number(categoryId),
+                  categoryHandle: categoryHandle,
                   price: parseFloat(price),
                   discountedPrice: discountedPrice ? parseFloat(discountedPrice) : null,
                   handle

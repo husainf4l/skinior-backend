@@ -58,13 +58,15 @@ model Product {
   image           String?
   handle          String?   @unique @default(uuid())
   isFeatured      Boolean   @default(false)
-  categoryId      Int
+  categoryHandle      String @default("hair-care")
   price           Float     @default(0)
   discountedPrice Float?
-  category        Category  @relation(fields: [categoryId], references: [id])
+  category        Category  @relation(fields: [categoryHandle], references: [handle])
   variants        Variant[]
 
   CartItem CartItem[]
+
+  OrderItem OrderItem[]
 }
 
 model Variant {
@@ -73,12 +75,11 @@ model Variant {
   name      String
   sku       String
   image     String?
-
   product Product @relation(fields: [productId], references: [id])
-
   CartItem CartItem[]
-
   UserReview UserReview[]
+
+  OrderItem OrderItem[]
 }
 
 // Category and Promotion Models
@@ -91,7 +92,7 @@ model Category {
   subcategories Category[]          @relation("Parent")
   products      Product[]
   promotions    PromotionCategory[]
-  handle        String
+  handle        String  @unique
 }
 
 model Promotion {
@@ -106,13 +107,13 @@ model Promotion {
 }
 
 model PromotionCategory {
-  categoryId  Int
+  categoryHandle  String
   promotionId Int
 
-  category  Category  @relation(fields: [categoryId], references: [id])
+  category  Category  @relation(fields: [categoryHandle], references: [handle])
   promotion Promotion @relation(fields: [promotionId], references: [id])
 
-  @@id([categoryId, promotionId])
+  @@id([categoryHandle, promotionId])
 }
 
 // Order Models
@@ -149,25 +150,14 @@ model Address {
   line1      String
   line2      String?
   city       String
-  region     String?
-  postalCode String
-  countryId  Int
-
-  country       Country       @relation(fields: [countryId], references: [id])
+  phoneNumber String
+  country       String      
   userAddresses UserAddress[]
-
   ShoppingCart ShoppingCart[]
-
   Order Order[]
 }
 
-model Country {
-  id        Int       @id @default(autoincrement())
-  name      String
-  addresses Address[]
-}
 
-// Payment Models
 model UserPaymentMethod {
   id            Int      @id @default(autoincrement())
   userId        String
@@ -214,7 +204,7 @@ model Order {
   guestInfoId      Int?
   addressId        Int?
   paymentMethodId  Int?
-  shippingMethodId Int
+  shippingMethodId Int             // This field must be defined here
   status           OrderStatusenm
   total            Float
   date             DateTime       @default(now())
@@ -222,7 +212,21 @@ model Order {
   guestInfo        GuestInfo?     @relation(fields: [guestInfoId], references: [id])
   address          Address?       @relation(fields: [addressId], references: [id])
   shippingMethod   ShippingMethod @relation(fields: [shippingMethodId], references: [id])
-  cartItems        CartItem[]
+  orderItems       OrderItem[]
+}
+
+model OrderItem {
+  id        Int    @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  variantId Int?
+  quantity  Int
+  price     Float  @default(0.0)
+  total     Float  @default(0.0)
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+  variant Variant? @relation(fields: [variantId], references: [id])
 }
 
 model CartItem {
@@ -237,5 +241,4 @@ model CartItem {
   product        Product       @relation(fields: [productId], references: [id])
   variant        Variant?      @relation(fields: [variantId], references: [id])
   orderId        Int?
-  Order          Order[]
 }

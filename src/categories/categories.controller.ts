@@ -11,8 +11,8 @@ export class CategoriesController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number) {
-    return this.categoriesService.findOne(id);
+  async findOne(@Param('handle') handle: string) {
+    return this.categoriesService.findOne(handle);
   }
 
   @Post()
@@ -21,12 +21,12 @@ export class CategoriesController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: number, @Body() data: any) {
-    return this.categoriesService.update(id, data);
+  async update(@Param('handle') handle: string, @Body() data: any) {
+    return this.categoriesService.update(handle, data);
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: number) {
-    return this.categoriesService.delete(id);
+  async delete(@Param('handle') handle: string) {
+    return this.categoriesService.delete(handle);
   }
 }
