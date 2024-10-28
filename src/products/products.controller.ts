@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, Query } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, Product } from '@prisma/client';
 
 @Controller('products')
 export class ProductsController {
@@ -32,6 +32,10 @@ export class ProductsController {
   @Get('/less/:price')
   async productByPrice(@Param('price') price: number) {
     return this.productsService.productsByPrice(+price);
+  }
+  @Get('search')
+  async searchProducts(@Query('query') query: string): Promise<Product[]> {
+    return this.productsService.searchProducts(query);
   }
 
   @Get('top-selling')

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, Product } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 
@@ -37,6 +37,33 @@ export class ProductsService {
     });
   }
 
+  async searchProducts(query: string): Promise<Product[]> {
+    if (!query) {
+      return [];
+    }
+    return this.prisma.product.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+          {
+            metaKeywords: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+    });
+  }
+
+
+
+  
   
   async categoryProducts(categoryHandle: string) {
     return this.prisma.product.findMany({
