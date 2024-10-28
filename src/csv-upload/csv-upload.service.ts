@@ -2,6 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as csv from 'csv-parser';
 import * as fs from 'fs';
+import { connect } from 'http2';
 
 @Injectable()
 export class CsvUploadService {
@@ -18,41 +19,35 @@ export class CsvUploadService {
         .on('end', async () => {
           try {
             for (const product of products) {
-              const { name, descriptionAr, descriptionEn, image, categoryHandle, price, discountedPrice,handle, items } = product;
+              const { name, descriptionAr, descriptionEn, image, categoryHandle, price, discountedPrice,handle, brand,metaKeywords,metaDescription,metaTitle  } = product;
 
-              // Create the product
+              
               const createdProduct = await this.prisma.product.create({
                 data: {
                   name,
                   descriptionAr,
                   descriptionEn,
                   image,
-                  categoryHandle: categoryHandle,
-                  price: parseFloat(price),
+                  category: {
+                    connect: {
+                      handle: categoryHandle, 
+                    },
+                  },            
+                        price: parseFloat(price),
                   discountedPrice: discountedPrice ? parseFloat(discountedPrice) : null,
-                  handle
-
+                  handle,
+                  brand,
+                  metaKeywords,
+                  metaDescription,
+                  metaTitle,
+                  
                 },
               });
-
-              // If product items are provided, create them
-              if (items) {
-                const productItems = JSON.parse(items); // Expecting `items` to be JSON formatted in CSV
-
-                for (const item of productItems) {
-                  await this.prisma.variant.create({
-                    data: {
-                      name:createdProduct.name,
-                      productId: createdProduct.id,
-                      sku: item.sku,
-                    },
-                  });
-                }
-              }
             }
             resolve();
           } catch (error) {
             reject(new BadRequestException('CSV upload failed: ' + error.message));
+            console.log(error)
           }
         });
     });

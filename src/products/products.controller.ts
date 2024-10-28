@@ -25,7 +25,20 @@ export class ProductsController {
   async findOneHandel(@Param('handle') handle: string) {
     return this.productsService.findOneHandle(handle);
   }
+  @Get('/brand/:brand')
+  async productsByBrands(@Param('brand') brand: string) {
+    return this.productsService.productsByBrands(brand);
+  }
+  @Get('/less/:price')
+  async productByPrice(@Param('price') price: number) {
+    return this.productsService.productsByPrice(+price);
+  }
 
+  @Get('top-selling')
+  async getTopSellingProducts(){
+    return this.productsService.getTopSellingProducts(10)
+  }
+  
   @Get(':id')
   async findOne(@Param('id') id: number) {
     return this.productsService.findOne(+id);
@@ -46,4 +59,6 @@ export class ProductsController {
   async delete(@Param('id') id: number) {
     return this.productsService.delete(+id);
   }
+
+  
 }

@@ -19,6 +19,25 @@ export class ProductsService {
     })
   }
 
+  async productsByBrands(brand: string) {
+    return this.prisma.product.findMany({
+      where: {
+        brand,
+      }
+    })
+  }
+
+  async productsByPrice(price: number) {
+    return this.prisma.product.findMany({
+      where: {
+        discountedPrice: {
+          lt: price,
+        },
+      },
+    });
+  }
+
+  
   async categoryProducts(categoryHandle: string) {
     return this.prisma.product.findMany({
       where: { categoryHandle },
@@ -54,4 +73,25 @@ export class ProductsService {
   async delete(id: number) {
     return this.prisma.product.delete({ where: { id } });
   }
+
+
+    // Top-Selling Products with Aggregation
+    async getTopSellingProducts(limit: number) {
+      const topProducts = await this.prisma.orderItem.groupBy({
+        by: ['productId'],
+        _sum: { quantity: true },
+        orderBy: { _sum: { quantity: 'desc' } },
+        take: limit,
+      });
+  
+      const productIds = topProducts.map((item) => item.productId);
+  
+      return this.prisma.product.findMany({
+        where: { id: { in: productIds } },
+        include: {
+          category: true,
+          variants: true,
+        },
+      });
+    }
 }

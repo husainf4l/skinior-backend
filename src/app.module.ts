@@ -13,10 +13,11 @@ import { ProductsVariantsService } from './products-variants/products-variants.s
 import { ProductsVariantsController } from './products-variants/products-variants.controller';
 import { CartService } from './cart/cart.service';
 import { CartModule } from './cart/cart.module';
+import { BannerModule } from './banner/banner.module';
 
 
 @Module({
-  imports: [PrismaModule, UsersModule, ProductsModule, CategoriesModule, OrdersModule, ShippingMethodsModule, UserReviewsModule, CartModule],
+  imports: [PrismaModule, UsersModule, ProductsModule, CategoriesModule, OrdersModule, ShippingMethodsModule, UserReviewsModule, CartModule, BannerModule],
   controllers: [CsvUploadController, ProductsVariantsController],
   providers: [CsvUploadService, ProductsVariantsService, CartService],
 })
