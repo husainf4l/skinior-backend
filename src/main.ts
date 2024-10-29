@@ -9,11 +9,9 @@ async function bootstrap() {
     AppModule,
   );
 
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads/',
-  });
+  const uploadsPath = join(__dirname, '..', '..', 'uploads');
 
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+  app.useStaticAssets(uploadsPath, {
     prefix: '/api/uploads/',
   });
 
@@ -21,5 +19,6 @@ async function bootstrap() {
   app.enableCors();
 
   await app.listen(3001, '0.0.0.0');
+
 }
 bootstrap();
