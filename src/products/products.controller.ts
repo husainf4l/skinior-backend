@@ -4,7 +4,7 @@ import { Prisma, Product } from '@prisma/client';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(private readonly productsService: ProductsService) { }
 
   @Get()
   async findAll() {
@@ -12,13 +12,19 @@ export class ProductsController {
   }
 
   @Get('featured/:categoryHandle')
-  async featuredCategory(@Param('categoryHandle') categoryHandle:string){
+  async featuredCategory(@Param('categoryHandle') categoryHandle: string) {
     return this.productsService.featuredCategory(categoryHandle);
   }
 
   @Get('category/:categoryHandle')
-  async categoriesProducts(@Param('categoryHandle') categoryHandle:string){
+  async categoriesProducts(@Param('categoryHandle') categoryHandle: string) {
     return this.productsService.categoryProducts(categoryHandle)
+  }
+
+  @Post('clear-cache')
+  async clearCache(): Promise<string> {
+    await this.productsService.clearAllCache();
+    return `Cache cleared `;
   }
 
   @Get('/handle/:handle')
@@ -39,10 +45,10 @@ export class ProductsController {
   }
 
   @Get('top-selling')
-  async getTopSellingProducts(){
+  async getTopSellingProducts() {
     return this.productsService.getTopSellingProducts(10)
   }
-  
+
   @Get(':id')
   async findOne(@Param('id') id: number) {
     return this.productsService.findOne(+id);
@@ -64,5 +70,6 @@ export class ProductsController {
     return this.productsService.delete(+id);
   }
 
-  
+
+
 }

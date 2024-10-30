@@ -1,22 +1,44 @@
-import { Injectable } from '@nestjs/common';
+import { CACHE_MANAGER, CacheStore } from '@nestjs/cache-manager';
+import { Inject, Injectable } from '@nestjs/common';
 import { Prisma, Product } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: CacheStore, private prisma: PrismaService) { }
 
   async findAll() {
     return this.prisma.product.findMany();
   }
-  async featuredCategory(categoryHandle: string) {
-    return this.prisma.product.findMany({
-      where: {
-        categoryHandle,
-        isFeatured: true
-      }
-    })
+
+  async featuredCategory(categoryHandle: string): Promise<any[]> {
+    const cacheKey = `featured_category_${categoryHandle}`;
+
+    // Check cache for existing data
+    const cachedProducts = await this.cacheManager.get<Product[]>(cacheKey);
+    if (cachedProducts) {
+      console.log(`Returning cached products for category: ${categoryHandle}`);
+      return cachedProducts;
+    }
+
+    // Fetch from database if not cached
+    const products = await this.prisma.product.findMany({
+      where: { categoryHandle, isFeatured: true },
+      select: {
+        name: true,
+        image: true,
+        price: true,
+        brand: true,
+        handle: true,
+        discountedPrice: true,
+        shortDescription: true,
+      },
+    });
+
+    // Cache the results
+    await this.cacheManager.set(cacheKey, products, { ttl: 300 });
+    return products;
   }
 
   async productsByBrands(brand: string) {
@@ -37,7 +59,7 @@ export class ProductsService {
     });
   }
 
-  async searchProducts(query: string): Promise<Product[]> {
+  async searchProducts(query: string,): Promise<Product[]> {
     if (!query) {
       return [];
     }
@@ -63,21 +85,32 @@ export class ProductsService {
 
 
 
-  
-  
-  async categoryProducts(categoryHandle: string) {
-    return this.prisma.product.findMany({
+
+
+  async categoryProducts(categoryHandle: string): Promise<any[]> {
+    const cacheKey = `category_products_${categoryHandle}`;
+
+    const cachedProducts: Product[] = await this.cacheManager.get(cacheKey);
+    if (cachedProducts) {
+      console.log(`Returning cached products for category: ${categoryHandle}`);
+      return cachedProducts;
+    }
+
+    const products = await this.prisma.product.findMany({
       where: { categoryHandle },
       select: {
-        id: true,
         name: true,
         image: true,
         price: true,
-        handle:true,
-        discountedPrice: true
-      }
+        brand: true,
+        handle: true,
+        discountedPrice: true,
+        shortDescription: true,
+      },
+    });
 
-    })
+    await this.cacheManager.set(cacheKey, products, { ttl: 300 });
+    return products;
   }
 
 
@@ -102,23 +135,36 @@ export class ProductsService {
   }
 
 
-    // Top-Selling Products with Aggregation
-    async getTopSellingProducts(limit: number) {
-      const topProducts = await this.prisma.orderItem.groupBy({
-        by: ['productId'],
-        _sum: { quantity: true },
-        orderBy: { _sum: { quantity: 'desc' } },
-        take: limit,
-      });
-  
-      const productIds = topProducts.map((item) => item.productId);
-  
-      return this.prisma.product.findMany({
-        where: { id: { in: productIds } },
-        include: {
-          category: true,
-          variants: true,
-        },
-      });
+  // Top-Selling Products with Aggregation
+  async getTopSellingProducts(limit: number) {
+    const topProducts = await this.prisma.orderItem.groupBy({
+      by: ['productId'],
+      _sum: { quantity: true },
+      orderBy: { _sum: { quantity: 'desc' } },
+      take: limit,
+    });
+
+    const productIds = topProducts.map((item) => item.productId);
+
+    return this.prisma.product.findMany({
+      where: { id: { in: productIds } },
+      include: {
+        category: true,
+        variants: true,
+      },
+    });
+  }
+
+
+
+  async clearAllCache(): Promise<void> {
+    const cache = this.cacheManager as any;
+    if (cache.reset) {
+      await cache.reset();
+      console.log('All cache cleared');
+    } else {
+      console.warn('Cache store does not support reset operation');
     }
+  }
+
 }

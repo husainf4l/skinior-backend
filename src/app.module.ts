@@ -14,10 +14,15 @@ import { ProductsVariantsController } from './products-variants/products-variant
 import { CartService } from './cart/cart.service';
 import { CartModule } from './cart/cart.module';
 import { BannerModule } from './banner/banner.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 
 @Module({
-  imports: [PrismaModule, UsersModule, ProductsModule, CategoriesModule, OrdersModule, ShippingMethodsModule, UserReviewsModule, CartModule, BannerModule],
+  imports: [PrismaModule, UsersModule, ProductsModule, CategoriesModule, OrdersModule, ShippingMethodsModule, UserReviewsModule, CartModule, BannerModule, CacheModule.register({
+    ttl: 60,
+    max: 200,
+  }),
+  ],
   controllers: [CsvUploadController, ProductsVariantsController],
   providers: [CsvUploadService, ProductsVariantsService, CartService],
 })
