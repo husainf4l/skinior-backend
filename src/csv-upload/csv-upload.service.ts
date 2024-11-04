@@ -19,12 +19,14 @@ export class CsvUploadService {
         .on('end', async () => {
           try {
             for (const product of products) {
-              const { name, descriptionAr, descriptionEn, image, categoryHandle, price, discountedPrice,handle, brand,metaKeywords,metaDescription,metaTitle  } = product;
+              const { name,line, shortName, descriptionAr, descriptionEn, image, categoryHandle, price, discountedPrice,handle, brand,metaKeywords,metaDescription,metaTitle  } = product;
 
               
               const createdProduct = await this.prisma.product.create({
                 data: {
                   name,
+                  line,
+                  shortName,
                   descriptionAr,
                   descriptionEn,
                   image,

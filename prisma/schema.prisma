@@ -53,8 +53,8 @@ model Profile {
 model Product {
   id              Int         @id @default(autoincrement())
   name            String
-  shortName String?
-  shortDescription String?
+  line            String?
+  shortName       String?
   descriptionAr   String?
   descriptionEn   String?
   image           String?

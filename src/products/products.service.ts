@@ -32,7 +32,6 @@ export class ProductsService {
         brand: true,
         handle: true,
         discountedPrice: true,
-        shortDescription: true,
       },
     });
 
@@ -105,7 +104,6 @@ export class ProductsService {
         brand: true,
         handle: true,
         discountedPrice: true,
-        shortDescription: true,
       },
     });
 
