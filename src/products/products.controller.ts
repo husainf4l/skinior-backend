@@ -21,7 +21,7 @@ export class ProductsController {
     return this.productsService.categoryProducts(categoryHandle)
   }
 
-  @Post('clear-cache')
+  @Post('clear/clear-cache')
   async clearCache(): Promise<string> {
     await this.productsService.clearAllCache();
     return `Cache cleared `;
