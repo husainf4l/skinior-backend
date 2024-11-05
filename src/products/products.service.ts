@@ -43,11 +43,19 @@ export class ProductsService {
   }
 
   async productsByBrands(brand: string) {
-    return this.prisma.product.findMany({
+    const cacheKey = `brand_products_${brand}`;
+    const cachedProducts: Product[] = await this.cacheManager.get(cacheKey);
+    if (cachedProducts) {
+      console.log(`Returning cached products for category: ${brand}`);
+      return cachedProducts;
+    }
+    const products= await this.prisma.product.findMany({
       where: {
         brand,
       }
     })
+    await this.cacheManager.set(cacheKey, products, { ttl: 300 });
+    return products;
   }
 
   async productsByPrice(price: number) {
