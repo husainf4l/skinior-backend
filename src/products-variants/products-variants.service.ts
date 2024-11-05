@@ -14,7 +14,7 @@ export class ProductsVariantsService {
     }
   
     async create(data: any) {
-      return this.prisma.variant.create({ data });
+      return this.prisma.variant.create({ data:{productId:+data.productId,name:data.name,image:data.image, sku:data.sku } });
     }
   
     async update(id: number, data: any) {

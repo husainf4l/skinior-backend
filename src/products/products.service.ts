@@ -27,6 +27,8 @@ export class ProductsService {
       where: { categoryHandle, isFeatured: true },
       select: {
         name: true,
+        shortName:true,
+        line:true,
         image: true,
         price: true,
         brand: true,
@@ -100,6 +102,8 @@ export class ProductsService {
       select: {
         name: true,
         image: true,
+        shortName:true,
+        line:true,
         price: true,
         brand: true,
         handle: true,
@@ -113,11 +117,14 @@ export class ProductsService {
 
 
   async findOne(id: number) {
-    return this.prisma.product.findUnique({ where: { id }, include: { variants: true } });
+    return this.prisma.product.findUnique({ where: { id }, 
+      include: { 
+      variants:{orderBy:{id:"asc"}} 
+      } });
   }
 
   async findOneHandle(handle: string) {
-    return this.prisma.product.findUnique({ where: { handle }, include: { variants: true } });
+    return this.prisma.product.findUnique({ where: { handle }, include: { variants:{orderBy:{id:"asc"}}  } });
   }
 
   async create(data: Prisma.ProductCreateInput) {
@@ -148,7 +155,7 @@ export class ProductsService {
       where: { id: { in: productIds } },
       include: {
         category: true,
-        variants: true,
+        variants:{orderBy:{id:"asc"}} 
       },
     });
   }

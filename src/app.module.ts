@@ -15,10 +15,11 @@ import { CartService } from './cart/cart.service';
 import { CartModule } from './cart/cart.module';
 import { BannerModule } from './banner/banner.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { AuthorizedPosModule } from './authorized-pos/authorized-pos.module';
 
 
 @Module({
-  imports: [PrismaModule, UsersModule, ProductsModule, CategoriesModule, OrdersModule, ShippingMethodsModule, UserReviewsModule, CartModule, BannerModule, CacheModule.register({
+  imports: [PrismaModule, UsersModule, ProductsModule, CategoriesModule, OrdersModule, ShippingMethodsModule, UserReviewsModule, CartModule, BannerModule,AuthorizedPosModule, CacheModule.register({
     ttl: 60,
     max: 200,
   }),

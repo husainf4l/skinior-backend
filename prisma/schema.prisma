@@ -256,3 +256,19 @@ model Banner {
   image2 String?
   hexcode String?
 }
+
+model AuthorizedPointOfSale {
+  id           String   @id @default(uuid())
+  name         String
+  location     String
+  locationlink String?
+  latitude     Float?
+  longitude    Float?
+  phone        String?
+  category     String
+  website      String?
+  logo         String
+  altLogo      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
