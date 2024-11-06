@@ -52,7 +52,17 @@ export class OrderService {
     return order;
   }
 
-  async findAllOrders(userId: string) {
+  async findAllOrders() {
+    return this.prisma.order.findMany({
+      include: {
+        orderItems: true,
+        address: true
+      },
+      orderBy: { id: 'desc' }
+    })
+  }
+
+  async findUserOrders(userId: string) {
     const orders = await this.prisma.order.findMany({
       where: { userId },
       include: { orderItems: true },
@@ -69,10 +79,17 @@ export class OrderService {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: {
-        orderItems: true,
-        address: true,
+
+        orderItems: {
+          include: {
+            product: true,
+            variant: true,
+          },
+        }, address: true,
         guestInfo: true,
       },
+
+
     });
 
     if (!order) {
@@ -119,7 +136,7 @@ export class OrderService {
       data: {
         total: cart.total,
         status: 'PENDING',
-        shippingMethod: { connect: { id: 1 } }, 
+        shippingMethod: { connect: { id: 1 } },
         address: cart.address ? { connect: { id: cart.address.id } } : undefined,
         orderItems: {
           create: cart.items.map((item) => ({
@@ -133,7 +150,7 @@ export class OrderService {
       },
       include: { orderItems: true, address: true, shippingMethod: true },
     });
-    
+
 
     await this.prisma.cartItem.deleteMany({
       where: { shoppingCartId: cart.id },
@@ -145,5 +162,11 @@ export class OrderService {
 
     return order;
   }
+
+  async updateOrderById(id: number, data: Prisma.OrderUpdateInput) {
+    return this.prisma.order.update({ where: { id }, data });
+  }
+
+
 
 }

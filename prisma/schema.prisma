@@ -208,6 +208,7 @@ model Order {
   guestInfoId      Int?
   addressId        Int?
   paymentMethodId  Int?
+  notes            String?
   shippingMethodId Int // This field must be defined here
   status           OrderStatusenm
   total            Float
@@ -248,13 +249,13 @@ model CartItem {
 }
 
 model Banner {
-  id          Int    @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   title       String
   description String
   link        String
-  image1 String?
-  image2 String?
-  hexcode String?
+  image1      String?
+  image2      String?
+  hexcode     String?
 }
 
 model AuthorizedPointOfSale {

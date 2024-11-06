@@ -1,6 +1,6 @@
 import { Controller, Post, Get, Param, Body, Patch, NotFoundException, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { OrderService } from './orders.service';
-import { OrderStatusenm } from '@prisma/client';
+import { OrderStatusenm, Prisma } from '@prisma/client';
 
 @Controller('orders')
 export class OrderController {
@@ -31,10 +31,14 @@ export class OrderController {
     }
   }
 
+  @Get('findallorders')
+  async getAllOrders() {
+    return this.orderService.findAllOrders()
+  }
 
   @Get('user/:userId')
-  async getAllOrders(@Param('userId') userId: string) {
-    const orders = await this.orderService.findAllOrders(userId);
+  async getUserOrders(@Param('userId') userId: string) {
+    const orders = await this.orderService.findUserOrders(userId);
     if (!orders.length) throw new NotFoundException('No orders found for this user');
     return orders;
   }
@@ -43,6 +47,12 @@ export class OrderController {
   async getOrderById(@Param('id') id: number) {
     return this.orderService.getOrderById(+id);
   }
+
+  @Patch('order/:id')
+  async update(@Param('id') id: number, @Body() data: Prisma.OrderUpdateInput) {
+    return this.orderService.updateOrderById(+id, data);
+  }
+
 
   @Patch(':id/status')
   async updateOrderStatus(
