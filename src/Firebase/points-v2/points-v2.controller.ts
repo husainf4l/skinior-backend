@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { PointsV2Service } from './points-v2.service';
 import { FirebaseService } from '../firebase/firebase.service';
 
@@ -18,9 +18,17 @@ export class PointsV2Controller {
     }
 
     @Get('user-transactions/all')
-    async getTransactions() {
-        return this.pointsV2Service.getAllTransactions();
+    async getTransactions(
+        @Query('limit') limit: number,
+        @Query('toggle') toggle: string
+    ): Promise<any[]> {
+        const transactionLimit = limit ? +limit : 100;
+        const isChecked = toggle === 'true';
+        return this.pointsV2Service.getAllTransactions(+transactionLimit, isChecked);
     }
+
+
+
 
     @Put('transactions/:transactionId')
     async updatePoints(
@@ -47,10 +55,6 @@ export class PointsV2Controller {
         return this.firebaseService.sendNotification(body.token, body.title, body.message, 'pointvs1');
     }
 
-    @Get('clean-cache')
-    cleanCach() {
-        this.pointsV2Service.clearAllCache();
-    }
 
 
 }

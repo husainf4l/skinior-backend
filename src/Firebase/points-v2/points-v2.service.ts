@@ -76,22 +76,20 @@ export class PointsV2Service {
             ...data,
             id: doc.id,
             createdOn: data.createdOn ? this.parseFirestoreTimestamp(data.createdOn) : null,
+            checkedOn: data.checkedOn ? this.parseFirestoreTimestamp(data.checkedOn) : null,
+
         };
     }
 
+    async getAllTransactions(limit: number, toggle: boolean): Promise<any[]> {
+        // Firestore query with orderBy, where, and limit
+        const snapshot = await this.pointsTransactions
+            .orderBy('createdOn', 'desc') // Order transactions by createdOn
+            .where('isChecked', '==', toggle) // Filter based on isChecked
+            .limit(limit) // Limit the number of results
+            .get();
 
-    async getAllTransactions() {
-        const cacheKey = `getAllTransactions`;
-
-        // Check for cached data
-        const cachedTransactions = await this.cacheManager.get<any[]>(cacheKey);
-        if (cachedTransactions) {
-            console.log(`Returning cached Transactions`);
-            return cachedTransactions;
-        }
-
-        // Fetch data from Firestore
-        const snapshot = await this.pointsTransactions.orderBy('createdOn', 'desc').get();
+        // Map Firestore documents to a usable format
         const transactions = snapshot.docs.map((doc) => {
             const data = doc.data();
 
@@ -103,12 +101,9 @@ export class PointsV2Service {
             };
         });
 
-        // Cache the fetched data
-        await this.cacheManager.set(cacheKey, transactions, { ttl: 600 });
-
         return transactions;
-
     }
+
 
     async updatePoints(
         transactionId: string,
@@ -234,14 +229,18 @@ export class PointsV2Service {
         }
     }
 
+    async redeemPoints(transactionId: string,
+        data: {
 
-    async clearAllCache(): Promise<void> {
-        const cache = this.cacheManager as any;
-        if (cache.reset) {
-            await cache.reset();
-            console.log('All cache cleared');
-        } else {
-            console.warn('Cache store does not support reset operation');
-        }
+            UserUid: string;
+            userName: string;
+            posName: string;
+            fcmToken: string;
+        }) {
+        await this.pointsTransactions.doc(transactionId).update({
+
+        })
     }
+
+
 }
