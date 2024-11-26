@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { PointsV2Service } from './points-v2.service';
 import { FirebaseService } from '../firebase/firebase.service';
 
@@ -17,10 +17,31 @@ export class PointsV2Controller {
         return this.pointsV2Service.getUserByUid(UserUid);
     }
 
+    @Get('user-transactions/all')
+    async getTransactions() {
+        return this.pointsV2Service.getAllTransactions();
+    }
+
+    @Put('transactions/:transactionId')
+    async updatePoints(
+        @Param('transactionId') transactionId: string,
+        @Body() data: { margoSales: number; papayaSales: number; lavaSales: number; bracket: number; currentPoints: number, invRef: string, UserUid: string, userName: string, posName: string, fcmToken: string }
+    ) {
+        return this.pointsV2Service.updatePoints(transactionId, data);
+    }
+
+    @Get('transactions/:id')
+    async getTransactionById(@Param('id') id: string) {
+        return this.pointsV2Service.getTransactionById(id);
+    }
+
     @Get('user-transactions/:UserUid')
     async getUserTransactions(@Param('UserUid') UserUid: string) {
         return this.pointsV2Service.getUserTransactions(UserUid);
     }
+
+
+
 
     @Post('send-notification')
     async sendNotification(
@@ -28,6 +49,7 @@ export class PointsV2Controller {
     ) {
         return this.firebaseService.sendNotification(body.token, body.title, body.message, 'pointvs1');
     }
+
 
 
 }

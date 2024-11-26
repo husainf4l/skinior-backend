@@ -273,3 +273,18 @@ model AuthorizedPointOfSale {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+model companyPointsTransactions {
+  id            String   @id @default(uuid())
+  invRef        String
+  points        Int
+  posName       String
+  userName      String
+  totalSales    Float
+  margoSales    Float
+  papayaSales   Float
+  lavaSales     Float
+  transactionId String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
