@@ -40,9 +40,6 @@ export class PointsV2Controller {
         return this.pointsV2Service.getUserTransactions(UserUid);
     }
 
-
-
-
     @Post('send-notification')
     async sendNotification(
         @Body() body: { token: string; title: string; message: string, }
@@ -50,6 +47,10 @@ export class PointsV2Controller {
         return this.firebaseService.sendNotification(body.token, body.title, body.message, 'pointvs1');
     }
 
+    @Get('clean-cache')
+    cleanCach() {
+        this.pointsV2Service.clearAllCache();
+    }
 
 
 }
