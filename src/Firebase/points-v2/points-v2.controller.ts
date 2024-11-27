@@ -27,8 +27,37 @@ export class PointsV2Controller {
         return this.pointsV2Service.getAllTransactions(+transactionLimit, isChecked);
     }
 
+    @Post('redeem/add')
+    async redeemAdd(
+        @Body() body: {
 
+            transactionId: string,
+            UserUid: string,
+            points: number,
+            fcmToken: string,
+            currentPoints: number,
 
+        }
+    ) {
+        return this.pointsV2Service.redeemAdd(body);
+    }
+    ///edit/add
+    @Post('edit/add')
+    async editAdd(
+        @Body() body: {
+
+            UserUid: string;
+            date: string;
+            type: number;
+            status: string;
+            points: number;
+            PosName: string;
+            UserName: string;
+
+        }
+    ) {
+        return this.pointsV2Service.editAdd(body);
+    }
 
     @Put('transactions/:transactionId')
     async updatePoints(
@@ -55,6 +84,9 @@ export class PointsV2Controller {
         return this.firebaseService.sendNotification(body.token, body.title, body.message, 'pointvs1');
     }
 
-
+    @Get('getcompanytransactionbyid/:id')
+    async getcompanytransactionbyid(@Param('id') id: string) {
+        return this.pointsV2Service.getCompanyTransactionById(id);
+    }
 
 }

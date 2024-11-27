@@ -3,6 +3,7 @@ import { firestorePointVs1 } from '../firebase/firebase.config';
 import { CACHE_MANAGER, CacheStore } from '@nestjs/cache-manager';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as admin from 'firebase-admin';
+import { Timestamp } from 'firebase-admin/firestore'; // Ensure you import Firestore Timestamp
 
 
 @Injectable()
@@ -82,14 +83,14 @@ export class PointsV2Service {
     }
 
     async getAllTransactions(limit: number, toggle: boolean): Promise<any[]> {
-        // Firestore query with orderBy, where, and limit
-        const snapshot = await this.pointsTransactions
-            .orderBy('createdOn', 'desc') // Order transactions by createdOn
-            .where('isChecked', '==', toggle) // Filter based on isChecked
-            .limit(limit) // Limit the number of results
-            .get();
+        let query = this.pointsTransactions.orderBy('createdOn', 'desc').limit(limit);
 
-        // Map Firestore documents to a usable format
+        if (!toggle) {
+            query = query.where('isChecked', '==', false);
+        }
+
+        const snapshot = await query.get();
+
         const transactions = snapshot.docs.map((doc) => {
             const data = doc.data();
 
@@ -103,6 +104,7 @@ export class PointsV2Service {
 
         return transactions;
     }
+
 
 
     async updatePoints(
@@ -202,7 +204,7 @@ export class PointsV2Service {
                 points: data.transactionPoints,
                 userName: data.userName,
                 posName: data.posName,
-                invRef: data.invRef,
+                invRef: data.posName + data.invRef,
                 margoSales: data.margoSales,
                 papayaSales: data.papayaSales,
                 lavaSales: data.lavaSales,
@@ -229,18 +231,79 @@ export class PointsV2Service {
         }
     }
 
-    async redeemPoints(transactionId: string,
+    async redeemAdd(
         data: {
-
-            UserUid: string;
-            userName: string;
-            posName: string;
-            fcmToken: string;
+            transactionId: string,
+            UserUid: string,
+            points: number,
+            fcmToken: string,
+            currentPoints: number,
         }) {
-        await this.pointsTransactions.doc(transactionId).update({
+        await this.pointsTransactions.doc(data.transactionId).update({
+            "points": - data.points,
+            'checkedOn': Timestamp.fromDate(new Date()),
+            'isChecked': true,
+            'status': `تم صرف ${data.points}`
+        });
+        await this.vs1Users.doc(data.UserUid).update({
+            points: data.currentPoints - data.points
+        });
 
-        })
+        await this.sendNotification(
+            data.fcmToken,
+            'تم اضافة النقاط',
+            `تم صرف ${data.points} نقطة`
+        );
     }
+
+
+    async editAdd(data: {
+        UserUid: string;
+        date: string;
+        type: number;
+        status: string;
+        points: number;
+    }) {
+        try {
+            console.log("Received data:", data);
+
+            // Convert `date` to Firestore Timestamp
+            const createdOnTimestamp = Timestamp.fromDate(new Date(data.date));
+
+            // Add the document to Firestore
+            await this.pointsTransactions.doc().create({
+                UserUid: data.UserUid,
+                points: data.points,
+                type: data.type,
+                createdOn: createdOnTimestamp, // Firestore Timestamp
+                isChecked: true,
+                checkedOn: Timestamp.fromDate(new Date()), // Current timestamp
+                status: data.status,
+                image: "https://firebasestorage.googleapis.com/v0/b/pointsv1.appspot.com/o/%D8%AD%D8%B1%D9%83%D8%A7%D8%AA%2Finvoices.jpg?alt=media&token=5e1c8d26-4603-4398-a504-2d4059c1b731",
+            });
+
+            console.log("Document successfully created");
+        } catch (error) {
+            console.error("Error adding document:", error.message);
+            throw error;
+        }
+    }
+    async getCompanyTransactionById(transactionId: string): Promise<any> {
+        try {
+            const transaction = await this.prisma.companyPointsTransactions.findFirst({
+                where: {
+                    transactionId: transactionId,
+                },
+            });
+
+            return transaction ? { success: true, data: transaction } : { success: false, message: "No data" };
+        } catch (error) {
+            console.error("Error fetching transaction:", error.message);
+            throw error;
+        }
+    }
+
+
 
 
 }
