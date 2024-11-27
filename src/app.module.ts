@@ -17,12 +17,12 @@ import { BannerModule } from './banner/banner.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { AuthorizedPosModule } from './authorized-pos/authorized-pos.module';
 import { FirebaseModule } from './Firebase/firebase/firebase.module';
-import { PointsUsersModule } from './Firebase/points-user/points-user.module';
+import { PointsV1Module } from './Firebase/points-v1/points-user.module';
 import { PointsV2Module } from './Firebase/points-v2/points-v2.module';
 
 
 @Module({
-  imports: [PrismaModule, FirebaseModule, PointsUsersModule, UsersModule, ProductsModule, CategoriesModule, OrdersModule, ShippingMethodsModule, UserReviewsModule, CartModule, BannerModule, AuthorizedPosModule, CacheModule.register({
+  imports: [PrismaModule, FirebaseModule, PointsV1Module, UsersModule, ProductsModule, CategoriesModule, OrdersModule, ShippingMethodsModule, UserReviewsModule, CartModule, BannerModule, AuthorizedPosModule, CacheModule.register({
     ttl: 60,
     max: 200,
   }), PointsV2Module,

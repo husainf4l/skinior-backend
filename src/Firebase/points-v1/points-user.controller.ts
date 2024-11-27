@@ -1,20 +1,20 @@
 import { BadRequestException, Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
-import { PointsV2Service } from './points-v2.service';
 import { FirebaseService } from '../firebase/firebase.service';
+import { PointsV1Service } from './points-user.service';
 
-@Controller('points-v2')
-export class PointsV2Controller {
 
-    constructor(private readonly pointsV2Service: PointsV2Service, private readonly firebaseService: FirebaseService) { }
+@Controller('points-v1')
+export class PointsV1Controller {
+    constructor(private readonly pointsV1Service: PointsV1Service, private readonly firebaseService: FirebaseService) { }
 
     @Get('users')
     async getAllUsers() {
-        return this.pointsV2Service.getAllUsers();
+        return this.pointsV1Service.getAllUsers();
     }
 
     @Get('users/:UserUid')
     async getUserByUid(@Param('UserUid') UserUid: string) {
-        return this.pointsV2Service.getUserByUid(UserUid);
+        return this.pointsV1Service.getUserByUid(UserUid);
     }
 
     @Get('user-transactions/all')
@@ -24,7 +24,7 @@ export class PointsV2Controller {
     ): Promise<any[]> {
         const transactionLimit = limit ? +limit : 100;
         const isChecked = toggle === 'true';
-        return this.pointsV2Service.getAllTransactions(+transactionLimit, isChecked);
+        return this.pointsV1Service.getAllTransactions(+transactionLimit, isChecked);
     }
 
     @Post('redeem/add')
@@ -39,7 +39,7 @@ export class PointsV2Controller {
 
         }
     ) {
-        return this.pointsV2Service.redeemAdd(body);
+        return this.pointsV1Service.redeemAdd(body);
     }
     ///edit/add
     @Post('edit/add')
@@ -56,7 +56,7 @@ export class PointsV2Controller {
 
         }
     ) {
-        return this.pointsV2Service.editAdd(body);
+        return this.pointsV1Service.editAdd(body);
     }
 
     @Put('transactions/:transactionId')
@@ -64,17 +64,17 @@ export class PointsV2Controller {
         @Param('transactionId') transactionId: string,
         @Body() data: { margoSales: number; papayaSales: number; lavaSales: number; bracket: number; currentPoints: number, invRef: string, UserUid: string, userName: string, posName: string, fcmToken: string }
     ) {
-        return this.pointsV2Service.updatePoints(transactionId, data);
+        return this.pointsV1Service.updatePoints(transactionId, data);
     }
 
     @Get('transactions/:id')
     async getTransactionById(@Param('id') id: string) {
-        return this.pointsV2Service.getTransactionById(id);
+        return this.pointsV1Service.getTransactionById(id);
     }
 
     @Get('user-transactions/:UserUid')
     async getUserTransactions(@Param('UserUid') UserUid: string) {
-        return this.pointsV2Service.getUserTransactions(UserUid);
+        return this.pointsV1Service.getUserTransactions(UserUid);
     }
 
     @Post('send-notification')
@@ -86,7 +86,7 @@ export class PointsV2Controller {
 
     @Get('getcompanytransactionbyid/:id')
     async getcompanytransactionbyid(@Param('id') id: string) {
-        return this.pointsV2Service.getCompanyTransactionById(id);
+        return this.pointsV1Service.getCompanyTransactionById(id);
     }
 
 
@@ -98,12 +98,12 @@ export class PointsV2Controller {
             throw new BadRequestException('Missing required fields.');
         }
 
-        return this.pointsV2Service.updateBracket(body)
+        return this.pointsV1Service.updateBracket(body)
     }
 
 
     @Get('ops')
     upateAllUsers() {
-        this.pointsV2Service.updateAllUsers();
+        this.pointsV1Service.updateAllUsers();
     }
 }

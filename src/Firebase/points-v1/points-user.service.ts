@@ -5,20 +5,22 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import * as admin from 'firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore'; // Ensure you import Firestore Timestamp
 
-
 @Injectable()
-export class PointsV2Service {
-    constructor(@Inject(CACHE_MANAGER) private cacheManager: CacheStore, private prisma: PrismaService, @Inject('FIREBASE_APP_POINTVS1') private readonly firebaseAppPointVs1: admin.app.App,
+export class PointsV1Service {
+    constructor(private prisma: PrismaService, @Inject('FIREBASE_APP_POINTVS1') private readonly firebaseAppPointVs1: admin.app.App,
     ) { }
-
-    private readonly pointsTransactions = firestorePointVs1.collection('pointsTransactions');
     private readonly vs1Users = firestorePointVs1.collection('users');
+    private readonly pointsTransactions = (UserUid: string) =>
+        firestorePointVs1.collection('users').doc(UserUid).collection('pointsHistory');
+
+
+
     private parseFirestoreTimestamp(timestamp: { _seconds: number; _nanoseconds: number }): Date {
         return new Date(timestamp._seconds * 1000 + timestamp._nanoseconds / 1e6);
     }
 
     async getAllUsers(): Promise<any[]> {
-        const snapshot = await this.vs1Users.orderBy('lastSeen', 'desc').get();
+        const snapshot = await this.vs1Users.orderBy('lastseen', 'desc').get();
         return snapshot.docs.map((doc) => {
             const data = doc.data();
 
@@ -27,10 +29,13 @@ export class PointsV2Service {
                 id: doc.id,
                 createdAt: data.createdAt ? this.parseFirestoreTimestamp(data.createdAt) : null,
                 updatedAt: data.updatedAt ? this.parseFirestoreTimestamp(data.updatedAt) : null,
+                lastseen: data.lastseen ? this.parseFirestoreTimestamp(data.lastseen) : null,
                 lastSeen: data.lastSeen ? this.parseFirestoreTimestamp(data.lastSeen) : null,
+
             };
         });
     }
+
     async getUserByUid(UserUid: string) {
         const doc = await this.vs1Users.doc(UserUid).get();
 
@@ -43,14 +48,15 @@ export class PointsV2Service {
             id: doc.id,
             createdOn: data.createdOn ? this.parseFirestoreTimestamp(data.createdOn) : null,
             updatedAt: data.updatedAt ? this.parseFirestoreTimestamp(data.updatedAt) : null,
+            lastseen: data.lastseen ? this.parseFirestoreTimestamp(data.lastseen) : null,
             lastSeen: data.lastSeen ? this.parseFirestoreTimestamp(data.lastSeen) : null,
+
         };
 
     }
 
     async getUserTransactions(UserUid: string) {
-        const snapshot = await this.pointsTransactions
-            .where('UserUid', '==', UserUid)
+        const snapshot = await this.pointsTransactions(UserUid)
             .orderBy('createdOn', 'desc')
             .get(); return snapshot.docs.map((doc) => {
                 const data = doc.data();
@@ -59,15 +65,16 @@ export class PointsV2Service {
                     ...data,
                     id: doc.id,
                     createdOn: data.createdOn ? this.parseFirestoreTimestamp(data.createdOn) : null,
-                    checkedOn: data.checkedOn ? this.parseFirestoreTimestamp(data.checkedOn) : null,
+                    doneBy: data.doneBy ? this.parseFirestoreTimestamp(data.doneBy) : null,
                 };
             });
 
+
     }
 
-    async getTransactionById(id: string) {
+    async getTransactionById(id: string,) {
 
-        const doc = await this.pointsTransactions.doc(id).get();
+        const doc = await this.pointsTransactions('igQgd7AKqBgnzbRYpN4oZc4FUql1').doc(id).get();
 
         if (!doc.exists) {
             throw new Error('Transaction not found');
@@ -77,32 +84,14 @@ export class PointsV2Service {
             ...data,
             id: doc.id,
             createdOn: data.createdOn ? this.parseFirestoreTimestamp(data.createdOn) : null,
-            checkedOn: data.checkedOn ? this.parseFirestoreTimestamp(data.checkedOn) : null,
+            doneBy: data.foneBy ? this.parseFirestoreTimestamp(data.doneBy) : null,
 
         };
+
     }
 
     async getAllTransactions(limit: number, toggle: boolean): Promise<any[]> {
-        let query = this.pointsTransactions.orderBy('createdOn', 'desc').limit(limit);
-
-        if (!toggle) {
-            query = query.where('isChecked', '==', false);
-        }
-
-        const snapshot = await query.get();
-
-        const transactions = snapshot.docs.map((doc) => {
-            const data = doc.data();
-
-            return {
-                ...data,
-                id: doc.id,
-                createdOn: data.createdOn ? this.parseFirestoreTimestamp(data.createdOn) : null,
-                checkedOn: data.checkedOn ? this.parseFirestoreTimestamp(data.checkedOn) : null,
-            };
-        });
-
-        return transactions;
+        return
     }
 
 
@@ -141,7 +130,7 @@ export class PointsV2Service {
         const newPoints = currentPoints + transactionPoints;
 
         try {
-            await this.updateTransaction(transactionId, transactionPoints, bracket);
+            await this.updateTransaction(transactionId, transactionPoints, bracket, UserUid);
 
             await this.updateUserPoints(UserUid, newPoints);
 
@@ -174,8 +163,8 @@ export class PointsV2Service {
         }
     }
 
-    private async updateTransaction(transactionId: string, transactionPoints: number, bracket: number): Promise<void> {
-        await this.pointsTransactions.doc(transactionId).update({
+    private async updateTransaction(transactionId: string, transactionPoints: number, bracket: number, UserUid: string): Promise<void> {
+        await this.pointsTransactions(UserUid).doc(transactionId).update({
             isChecked: true,
             points: transactionPoints,
             status: `تم اضافة ${transactionPoints} نقطة`,
@@ -241,7 +230,7 @@ export class PointsV2Service {
             fcmToken: string,
             currentPoints: number,
         }) {
-        await this.pointsTransactions.doc(data.transactionId).update({
+        await this.pointsTransactions(data.UserUid).doc(data.transactionId).update({
             "points": - data.points,
             'checkedOn': Timestamp.fromDate(new Date()),
             'isChecked': true,
@@ -273,7 +262,7 @@ export class PointsV2Service {
             const createdOnTimestamp = Timestamp.fromDate(new Date(data.date));
 
             // Add the document to Firestore
-            await this.pointsTransactions.doc().create({
+            await this.pointsTransactions(data.UserUid).doc().create({
                 UserUid: data.UserUid,
                 points: data.points,
                 type: data.type,
