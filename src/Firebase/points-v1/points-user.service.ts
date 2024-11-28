@@ -90,6 +90,22 @@ export class PointsV1Service {
 
     }
 
+    async userWallet(UserUid: string) {
+
+        const snapshot = await firestorePointVs1.collection('users').doc(UserUid).collection('redeemPointsRequest').orderBy('createdOn', 'desc').limit(3)
+            .get(); return snapshot.docs.map((doc) => {
+                const data = doc.data();
+
+                return {
+                    ...data,
+                    id: doc.id,
+                    createdOn: data.createdOn ? this.parseFirestoreTimestamp(data.createdOn) : null,
+                };
+            });
+
+
+    }
+
     async getAllTransactions(limit: number, toggle: boolean): Promise<any[]> {
         return
     }
@@ -220,24 +236,24 @@ export class PointsV1Service {
             transactionId: string,
             UserUid: string,
             points: number,
-            fcmToken: string,
             currentPoints: number,
         }) {
+        const newPoints = data.currentPoints - data.points
+
+        const transactionPoints = - data.points
         await this.pointsTransactions(data.UserUid).doc(data.transactionId).update({
-            "points": - data.points,
-            'checkedOn': Timestamp.fromDate(new Date()),
+            'currentPoints': data.currentPoints,
+            'newBalance': newPoints,
+            "points": `${transactionPoints}`,
+            'doneBy': Timestamp.fromDate(new Date()),
             'isChecked': true,
-            'status': `تم صرف ${data.points}`
+            'subTitle': `تم صرف ${data.points} نقطة`
         });
         await this.vs1Users.doc(data.UserUid).update({
-            points: data.currentPoints - data.points
+            points: `${newPoints}`
         });
 
-        await this.sendNotification(
-            data.fcmToken,
-            'تم اضافة النقاط',
-            `تم صرف ${data.points} نقطة`
-        );
+
     }
 
 

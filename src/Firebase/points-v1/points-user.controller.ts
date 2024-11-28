@@ -34,7 +34,6 @@ export class PointsV1Controller {
             transactionId: string,
             UserUid: string,
             points: number,
-            fcmToken: string,
             currentPoints: number,
 
         }
@@ -67,7 +66,12 @@ export class PointsV1Controller {
         return this.pointsV1Service.getTransactionById(id, useruid);
     }
 
-
+    @Get('wallet/:UserUid')
+    async userWallet(
+        @Param('UserUid') UserUid: string,
+    ) {
+        return this.pointsV1Service.userWallet(UserUid);
+    }
 
 
     @Put('transactions/:transactionId')
