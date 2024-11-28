@@ -72,9 +72,9 @@ export class PointsV1Service {
 
     }
 
-    async getTransactionById(id: string,) {
+    async getTransactionById(transactionId: string, UserUid: string) {
 
-        const doc = await this.pointsTransactions('igQgd7AKqBgnzbRYpN4oZc4FUql1').doc(id).get();
+        const doc = await this.pointsTransactions(UserUid).doc(transactionId).get();
 
         if (!doc.exists) {
             throw new Error('Transaction not found');
@@ -108,7 +108,6 @@ export class PointsV1Service {
             UserUid: string;
             userName: string;
             posName: string;
-            fcmToken: string;
         }
     ): Promise<void> {
         const {
@@ -121,7 +120,6 @@ export class PointsV1Service {
             userName,
             posName,
             invRef,
-            fcmToken,
         } = data;
 
         // Calculate points
@@ -147,12 +145,7 @@ export class PointsV1Service {
                 totalSales,
             });
 
-            // Send notification to user
-            await this.sendNotification(
-                fcmToken,
-                'تم اضافة النقاط',
-                `تم اضافة ${transactionPoints} نقطة`
-            );
+
 
             console.log(
                 `Points updated successfully for user ${userName}. New points total: ${newPoints}`
@@ -166,8 +159,8 @@ export class PointsV1Service {
     private async updateTransaction(transactionId: string, transactionPoints: number, bracket: number, UserUid: string): Promise<void> {
         await this.pointsTransactions(UserUid).doc(transactionId).update({
             isChecked: true,
-            points: transactionPoints,
-            status: `تم اضافة ${transactionPoints} نقطة`,
+            points: `${transactionPoints}`,
+            subTitle: `تم اضافة ${transactionPoints} نقطة`,
             checkedOn: new Date(),
             bracket: bracket
         });
@@ -175,7 +168,7 @@ export class PointsV1Service {
 
     private async updateUserPoints(UserUid: string, newPoints: number): Promise<void> {
         await this.vs1Users.doc(UserUid).update({
-            points: newPoints,
+            points: `${newPoints}`,
         });
     }
 

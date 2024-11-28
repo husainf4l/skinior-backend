@@ -59,18 +59,26 @@ export class PointsV1Controller {
         return this.pointsV1Service.editAdd(body);
     }
 
+    @Get('transactions/:id')
+    async getTransactionById(
+        @Param('id') id: string,
+        @Query('useruid') useruid: string
+    ) {
+        return this.pointsV1Service.getTransactionById(id, useruid);
+    }
+
+
+
+
     @Put('transactions/:transactionId')
     async updatePoints(
         @Param('transactionId') transactionId: string,
-        @Body() data: { margoSales: number; papayaSales: number; lavaSales: number; bracket: number; currentPoints: number, invRef: string, UserUid: string, userName: string, posName: string, fcmToken: string }
+        @Body() data: { margoSales: number; papayaSales: number; lavaSales: number; bracket: number; currentPoints: number, invRef: string, UserUid: string, userName: string, posName: string }
     ) {
         return this.pointsV1Service.updatePoints(transactionId, data);
     }
 
-    @Get('transactions/:id')
-    async getTransactionById(@Param('id') id: string) {
-        return this.pointsV1Service.getTransactionById(id);
-    }
+
 
     @Get('user-transactions/:UserUid')
     async getUserTransactions(@Param('UserUid') UserUid: string) {
