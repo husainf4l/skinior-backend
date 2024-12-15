@@ -250,7 +250,8 @@ export class PointsV1Service {
             'subTitle': `تم صرف ${data.points} نقطة`
         });
         await this.vs1Users.doc(data.UserUid).update({
-            points: `${newPoints}`
+            points: `${newPoints}`,
+            redeem: `${newPoints} JOD`
         });
 
 
