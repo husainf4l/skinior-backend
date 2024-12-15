@@ -220,7 +220,7 @@ export class PointsV1Service {
   ): Promise<void> {
     await this.vs1Users.doc(UserUid).update({
       points: `${newPoints}`,
-      redeem: `${newPoints} JOD`,
+      redeem: `${newPoints / 10} JOD`,
     });
   }
 
@@ -292,7 +292,7 @@ export class PointsV1Service {
       });
     await this.vs1Users.doc(data.UserUid).update({
       points: `${newPoints}`,
-      redeem: `${newPoints} JOD`,
+      redeem: `${newPoints / 10} JOD`,
     });
   }
 
